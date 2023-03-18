@@ -8,6 +8,10 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea
+.src/main/resources
+*.xml
+.src/test
 *.iws
 *.iml
 *.ipr
@@ -35,4 +39,12 @@ build/
 .vscode/
 
 ### Mac OS ###
-.DS_Store
+.DS_Store!/src/test/
+!/HW2.iml
+!/pom.xml
+!/.gitignore
+!/pom.xml
+!/.idea/
+!/src/main/resources/
+!/src/test/
+
