@@ -1,4 +1,9 @@
 package org.example;
+import org.example.obj.Car;
+import org.example.obj.DeparturePoint;
+import org.example.obj.EntryPoint;
+import org.example.obj.Parking;
+
 import java.util.Arrays;
 
 public class Main {
