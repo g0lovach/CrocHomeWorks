@@ -1,67 +1,189 @@
 package org.example;
 
+import java.util.Arrays;
+
+/**
+ * Класс описания парковок
+ */
 public class Parking {
 
-    Entry[] entries;
-    Departure[] departures;
-    int parkingSidesCount;
+    /**
+     * массив въездов {@link EntryPoint}
+     */
+    private final EntryPoint[] entryPoints;
+    /**
+     * Массив выездов {@link DeparturePoint}
+     */
+    private final DeparturePoint[] departurePoints;
+    /**
+     * Количество мест на парковке
+     */
+    private final int parkingSidesCount;
 
-    int parkingFreeSidesCount;
+    /**
+     * Количество свободных мест на парковке
+     */
+    private int parkingFreeSidesCount;
 
-    TryEntry[] tryEntries;
+    /**
+     * Массив, содержащий информацию о попытках въезда {@link TryEntry}
+     */
+    private TryEntry[] triesEntry;
 
-    Parking(Entry[] entries, Departure[] departures, int parkingSidesCount) {
-        this(entries, departures,parkingSidesCount, parkingSidesCount, new TryEntry[]{});
+
+    /**
+     * Неполный конструктор класса {@link Parking}.
+     * Используется аналогично {@link DeparturePoint#DeparturePoint(int, String)}
+     *
+     * @param entryPoints - массив точек въезда
+     * @param departurePoints - массив точек выезда
+     * @param parkingSidesCount - кол-во парковочных мест
+     */
+    Parking(EntryPoint[] entryPoints, DeparturePoint[] departurePoints, int parkingSidesCount) {
+        this(entryPoints, departurePoints,parkingSidesCount, parkingSidesCount, new TryEntry[]{});
 
     }
-    Parking(Entry[] entries, Departure[] departures, int parkingSidesCount,
-            int parkingFreeSidesCount, TryEntry[] tryEntries) {
 
-        this.departures = departures;
-        this.entries = entries;
+    /**
+     * Полный конструктор класса {@link Parking}.
+     * Используется аналогично {@link DeparturePoint#DeparturePoint(int, String, Car[])}
+     *
+     * @param entryPoints - массив точек въезда
+     * @param departurePoints - массив точек выезда
+     * @param parkingSidesCount - кол-во парковочных мест
+     * @param parkingFreeSidesCount - кол-во свободных парковочных мест
+     * @param triesEntry - массив попыток въезда
+     */
+    Parking(EntryPoint[] entryPoints, DeparturePoint[] departurePoints, int parkingSidesCount,
+            int parkingFreeSidesCount, TryEntry[] triesEntry) {
+
+        this.departurePoints = departurePoints;
+        this.entryPoints = entryPoints;
         this.parkingSidesCount = parkingSidesCount;
         this.parkingFreeSidesCount = parkingFreeSidesCount;
-        this.tryEntries = tryEntries;
+        this.triesEntry = triesEntry;
 
     }
 
-    void doEntry(Entry entry, Car car){
-        TryEntry[] tmp = new TryEntry[this.tryEntries.length + 1];
-        this.tryEntries = tmp;
+
+    /**
+     * Геттер кол-ва свободных мест
+     * @return - кол-во свободных мест
+     */
+    public int getParkingFreeSidesCount() {
+        return parkingFreeSidesCount;
+    }
+
+
+    /**
+     * Метод, фиксирующий въезд машины на парковку или фиксирующий неудачную попытку въезда
+     * (завсисит от наличия свободных мест). Учитывает возможное дублирование
+     * @param entryPoint  - въезд
+     * @param carsRegNumber - регистрационный номер машины
+     */
+    void doEntry(EntryPoint entryPoint, String carsRegNumber){
+        triesEntry = Arrays.copyOf(triesEntry, triesEntry.length+1);
+        boolean resultOfTry = false;
         if (parkingFreeSidesCount!=0) {
-            tryEntries[tmp.length - 1] = new TryEntry(car, entry, true);
-            this.parkingFreeSidesCount -= 1;
-            this.entries[entry.id].appendGuest(car);
+           parkingFreeSidesCount -= 1;
+           boolean duplicateFlag = false;
+           for (Car car: entryPoint.getGuests()){
+               if (car.getRegNumber().equals(carsRegNumber)) {
+                   duplicateFlag = true;
+                   break;
+               }
+           }
+           if(!duplicateFlag) {
+               entryPoint.appendGuest(new Car(carsRegNumber));
+           }
+            resultOfTry = true;
         }
-        else{
-            tryEntries[tmp.length - 1] = new TryEntry(car, entry, false);
+            triesEntry[triesEntry.length - 1] = new TryEntry(carsRegNumber, entryPoint, resultOfTry);
 
-        }
+
 
     }
 
-    void doDeparture(Departure departure, Car car){
+    /**
+     * Метод, фиксирующий факт выезда с парковки. Учитывает возможное дублирование
+     * @param departurePoint - выезд
+     * @param carsRegNumber - рег. номер авто
+     */
+    public void doDeparture(DeparturePoint departurePoint, String carsRegNumber){
 
-        this.parkingFreeSidesCount+=1;
-        this.departures[departure.id].appendGuest(car);
+        parkingFreeSidesCount+=1;
+        boolean duplicateFlag = false;
+        for (Car car: departurePoint.getGuests()){
+            if (car.getRegNumber().equals(carsRegNumber)) {
+                duplicateFlag = true;
+                break;
+            }
+        }
+        if(!duplicateFlag) {
+            departurePoint.appendGuest(new Car(carsRegNumber));
+        }
+
 
     }
 
-    boolean isAvailableToEntry(){
+    /**
+     * Метод, проверящий доступность въезда (зависит от наличия свободных мест )
+     * @return - доступность въезда
+     */
+    public boolean isAvailableToEntry(){
 
         return parkingFreeSidesCount!=0;
 
     }
 
-    int getParkingFreeSidesCount(){
+    /**
+     * Метод, возвращающий авто, успешно проехавшие через въезд. Учитывает возможное дублирование.
+     * @param entryPoint - въезд
+     * @return массив авто, проезжавших въезд
+     */
+    public Car[] getCarsByEntryPoint(EntryPoint entryPoint){
+        Car[] result = {};
+        for(TryEntry tE:triesEntry){
+            if(tE.isResult() && tE.getEntryPoint().equals(entryPoint)){
+                boolean duplicateFlag = false;
+                String tmpRegNumber = tE.getCarsRegNumber();
+                for(Car tmpCar: result){
+                    if (tmpCar.getRegNumber().equals(tmpRegNumber)){
+                        duplicateFlag = true;
+                        break;
+                    }
+                }
+                if (!duplicateFlag) {
+                    result = Arrays.copyOf(result, result.length + 1);
+                    result[result.length - 1] = entryPoint.getCarByRegNumber(tmpRegNumber);
+                }
 
-        return this.parkingFreeSidesCount;
+            }
+
+        }
+
+        return result;
     }
 
-    TryEntry[] getFailedTries(){
+    /**
+     * Метод, возвращающий массив авто, проехавших определенный выездю
+     * @param departurePoint - выезд
+     * @return массив авто, проехавших определенный выездю
+     */
+    public Car[] getCarsByDeparturePoint(DeparturePoint departurePoint){
+
+        return departurePoint.getGuests();
+    }
+
+
+    /**
+     * Метод, возвращающий массив неудачных попыток въезда.
+     * @return - массив неудачных попыток въезда.
+     */
+    public TryEntry[] getFailedEntryTries(){
         TryEntry[] res = {};
-        for (TryEntry tE: this.tryEntries){
-                if (!tE.result){
+        for (TryEntry tE: this.triesEntry){
+                if (!tE.isResult()){
 
                     TryEntry[] tmp = new TryEntry[res.length+1];
                     res = tmp;
@@ -74,30 +196,27 @@ public class Parking {
         return res;
 
     }
+    /**
+     * Метод преобразования в String.
+     * P.S. В задаче требований на добавление этого метода не было, но я его прописал для получения наглядной информации
+     * об объекте
+     * @return - строковое описание {@link Parking}
+     */
+    @Override
+    public String toString(){
 
-    /*int getCountCarsForEntry(Entry entry){
+        String result = "Parking { entryPoints = " + Arrays.toString(entryPoints) + "; departurePoints = "
+                + Arrays.toString(departurePoints) +
+                "; parkingSidesCount = " +
+                parkingSidesCount +
+                "; parkingFreeSidesCount = " +
+                parkingFreeSidesCount +
+                "; triesEntry = " +
+                Arrays.toString(triesEntry);
 
-        for (Entry e: this.entries) {
-            if (entry == e){
-                    return e.guests.length;
-            }
-
-        }
-        return -1;
-
+        return result +"}";
     }
 
-    int getCountCarsForDeparture(Departure departure){
-
-        for (Departure d: this.departures) {
-            if (departure == d){
-                return d.guests.length;
-            }
-
-        }
-        return -1;
-
-    }*/
 
 
 
