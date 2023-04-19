@@ -1,0 +1,20 @@
+<projects>
+    <project>
+        <title>Проект 1</title>
+        <description>Описание 1</description>
+        <managers>
+            <manager name="Человек 1">
+                <specialists>
+                    <specialist name="Человек 3"/>
+                    <specialist name="Человек 4"/>
+                </specialists>
+            </manager>
+            <manager name="Человек 2">
+                <specialists>
+                    <specialist name="Человек 5"/>
+                    <specialist name="Человек 6"/>
+                </specialists>
+            </manager>
+        </managers>
+    </project>
+</projects>
