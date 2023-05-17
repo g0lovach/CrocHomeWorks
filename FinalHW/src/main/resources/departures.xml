@@ -1,0 +1,12 @@
+<departures>
+    <departure>
+        <cityTo> Sochi </cityTo>
+        <date>12-05-2023 12:25:12</date>
+        <boardRegNumber>123</boardRegNumber>
+    </departure>
+    <departure>
+        <cityTo> Novosibirsk </cityTo>
+        <date>13-05-2023 12:25:16</date>
+        <boardRegNumber>1234</boardRegNumber>
+    </departure>
+</departures>

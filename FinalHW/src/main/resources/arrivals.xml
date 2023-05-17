@@ -1,0 +1,12 @@
+<arrivals>
+    <arrival>
+        <cityFrom> Sochi </cityFrom>
+        <date>12-05-2023 12:25:12</date>
+        <boardRegNumber>123gnm</boardRegNumber>
+    </arrival>
+    <arrival>
+        <cityFrom> Novosibirsk </cityFrom>
+        <date>13-05-2023 12:25:16</date>
+        <boardRegNumber>1234gf</boardRegNumber>
+    </arrival>
+</arrivals>
